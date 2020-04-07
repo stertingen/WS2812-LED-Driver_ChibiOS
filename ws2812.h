@@ -42,6 +42,10 @@ typedef enum {
 
 /* --- PUBLIC FUNCTIONS ----------------------------------------------------- */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief   Initialize the driver
  *
@@ -69,6 +73,10 @@ void ws2812_init(void);
  * @retval WS2812_LED_INVALID:      The write was to an invalid LED index
  */
 ws2812_err_t ws2812_write_led(uint32_t led_number, uint8_t r, uint8_t g, uint8_t b);
+
+#ifdef __cplusplus
+}
+#endif
 
 /** @} defgroup WS2812 */
 
