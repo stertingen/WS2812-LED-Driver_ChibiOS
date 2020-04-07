@@ -194,6 +194,8 @@
 
 static uint32_t ws2812_frame_buffer[WS2812_BIT_N + 1];                             /**< Buffer for a frame */
 
+static PWMConfig ws2812_pwm_config                                                 /**< Config for PWM driver */
+
 /* --- PUBLIC FUNCTIONS ----------------------------------------------------- */
 /*
  * Gedanke: Double-buffer type transactions: double buffer transfers using two memory pointers for
@@ -216,19 +218,10 @@ void ws2812_init(void)
 #endif
 
     // PWM Configuration
-    #pragma GCC diagnostic ignored "-Woverride-init"                                        // Turn off override-init warning for this struct. We use the overriding ability to set a "default" channel config
-    static const PWMConfig ws2812_pwm_config = {
-        .frequency          = WS2812_PWM_FREQUENCY,
-        .period             = WS2812_PWM_PERIOD, //Mit dieser Periode wird UDE-Event erzeugt und ein neuer Wert (Länge WS2812_BIT_N) vom DMA ins CCR geschrieben
-        .callback           = NULL,
-        .channels = {
-            [0 ... 3]       = {.mode = PWM_OUTPUT_DISABLED,     .callback = NULL},          // Channels default to disabled
-            [WS2812_TIM_CH] = {.mode = PWM_OUTPUT_ACTIVE_HIGH,  .callback = NULL},          // Turn on the channel we care about
-        },
-        .cr2                = 0,
-        .dier               = TIM_DIER_UDE,                                                 // DMA on update event for next period
-    };
-    #pragma GCC diagnostic pop                                                              // Restore command-line warning options
+    ws2812_pwm_config.frequency                     = WS2812_PWM_FREQUENCY;
+    ws2812_pwm_config.period                        = WS2812_PWM_PERIOD;       //Mit dieser Periode wird UDE-Event erzeugt und ein neuer Wert (Länge WS2812_BIT_N) vom DMA ins CCR geschrieben
+    ws2812_pwm_config.channels[WS2812_TIM_CH].mode  = PWM_OUTPUT_ACTIVE_HIGH;  // Turn on the channel we care about
+    ws2812_pwm_config.dier                          = TIM_DIER_UDE;            // DMA on update event for next period
 
     // Configure DMA
     //dmaInit(); // Joe added this
